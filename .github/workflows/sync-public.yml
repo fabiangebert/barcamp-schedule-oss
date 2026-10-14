@@ -1,0 +1,43 @@
+name: Sync public mirror
+
+# Fast-forwards the public open-source mirror (barcamp-schedule-oss) to the
+# current state of main after every push. Both repositories share the same
+# squashed root commit, so this is always a plain fast-forward push — never
+# a force push — which keeps the public history append-only and reviewable.
+#
+# Authentication uses a write-enabled deploy key registered on the mirror
+# repository; its private half is stored as the PUBLIC_SYNC_DEPLOY_KEY secret.
+#
+# The job is guarded by the repository name so it only runs in the private
+# source repository. On the mirror itself the job shows as "Skipped".
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    name: Push mirror
+    runs-on: ubuntu-latest
+    if: github.repository == 'fabiangebert/barcamp-schedule'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          # Full history so the mirror push can send the complete commit chain.
+          fetch-depth: 0
+
+      - name: Set up SSH key for mirror push
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.PUBLIC_SYNC_DEPLOY_KEY }}" > ~/.ssh/sync_key
+          chmod 600 ~/.ssh/sync_key
+          ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+          git config core.sshCommand "ssh -i ~/.ssh/sync_key -o IdentitiesOnly=yes"
+
+      - name: Push to public mirror
+        run: |
+          git remote add mirror git@github.com:fabiangebert/barcamp-schedule-oss.git
+          git push mirror main

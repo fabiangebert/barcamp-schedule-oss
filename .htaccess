@@ -1,0 +1,15 @@
+<IfModule mod_headers.c>
+    <FilesMatch "\.json$">
+        # Set Cache-Control to force revalidation with the server
+        Header unset Cache-Control
+        Header unset Pragma
+        Header unset Accept-Encoding
+        Header set Cache-Control "public, must-revalidate, max-age=0"
+    </FilesMatch>
+</IfModule>
+
+
+
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE application/json
+</IfModule>

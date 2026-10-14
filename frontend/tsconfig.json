@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "lib": ["ESNext", "DOM"],
+    "moduleResolution": "bundler",
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "strict": false,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "types": ["vite/client"],
+    "skipLibCheck": true
+  },
+  "include": [
+    "src/types/**/*",
+    "src/utils/**/*.js",
+    "src/composables/**/*.js",
+    "src/stores/**/*.js"
+  ],
+  "exclude": ["node_modules"]
+}

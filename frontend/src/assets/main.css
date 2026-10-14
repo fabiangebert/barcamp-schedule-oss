@@ -1,0 +1,174 @@
+@import "tailwindcss";
+
+/* Dark mode is driven by data-theme on <html>. The custom variant keeps a
+   `dark:` escape hatch for the few places a token swap cannot express. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme {
+  --font-sans: "Work Sans", ui-sans-serif, system-ui, sans-serif;
+
+  --color-primary: #100d4c;
+  --color-secondary: #fc5d53;
+  --color-tertiary: #ffe145;
+  --color-accent: #88d8d8;
+  --color-gray-mid: #70707c;
+  --color-gray-light: #c5c5c7;
+  --color-gray-bright: #f2f2f4;
+  --color-white: #ffffff;
+
+  /* Page and raised panel backgrounds. These are the theme-aware tokens:
+     --color-white and --color-gray-bright stay literal white/light grey so
+     that text and tints placed on dark surfaces keep working unchanged. */
+  --color-surface: #ffffff;
+  --color-surface-raised: #f2f2f4;
+  /* Subtle bands: table headers, modal headers, empty cells. Matches the
+     barely-there tint of gray-bright at 20-50% in the light theme. */
+  --color-surface-sunken: #f9f9fa;
+
+  /* Solid brand surfaces (navbar, primary buttons, selected chips).
+     Separated from --color-primary so that token can become the dark
+     theme's text colour without inverting these surfaces. */
+  --color-surface-inverse: #100d4c;
+
+  /* Micro-label sizes. Expressed in rem so that the presentation mode
+     root font size scales them together with the whole layout. */
+  --text-2xs: 0.6875rem; /* 11px */
+  --text-3xs: 0.625rem;  /* 10px */
+  --text-4xs: 0.5625rem; /* 9px */
+  --text-5xs: 0.5rem;    /* 8px */
+  --text-6xs: 0.4375rem; /* 7px */
+
+  --bg-color-topic-0: #e2e2e4; /* Pastel gray-Light */
+  --color-topic-0: #333338;    /* Soft Charcoal Text */
+
+  --bg-color-topic-1: #ffb3ae; /* Pastel Coral/Secondary */
+  --color-topic-1: #333338;
+
+  --bg-color-topic-2: #fff2ac; /* Pastel Yellow/Tertiary */
+  --color-topic-2: #333338;
+
+  --bg-color-topic-3: #bdeaea; /* Pastel Aqua/Accent */
+  --color-topic-3: #333338;
+
+  --bg-color-topic-4: #a9a9b3; /* Pastel gray-Mid */
+  --color-topic-4: #ffffff;    /* White Text */
+
+  --bg-color-topic-5: #6b6899; /* Pastel Navy/Primary */
+  --color-topic-5: #ffffff;
+
+  --z-index-100: 100;
+  --z-index-60: 60;
+}
+
+/* Dark theme. Each token changes role rather than just value: --color-primary
+   turns into the light text colour, and the surface tokens turn into the dark
+   backgrounds, so the existing utility call sites keep working without
+   modification. --color-white and --color-gray-bright deliberately stay put so
+   that white text on the brand surfaces remains readable. Declared after
+   @theme to win on equal specificity. */
+[data-theme="dark"] {
+  --color-primary: #f4f4f7;
+  --color-secondary: #ff6f66;
+  --color-tertiary: #ffe145;
+  --color-accent: #88d8d8;
+  --color-gray-mid: #a1a1ad;
+  --color-gray-light: #3a3a42;
+  --color-surface: #16161a;
+  --color-surface-raised: #242429;
+  --color-surface-sunken: #1e1e23;
+  --color-surface-inverse: #100d4c;
+
+  --bg-color-topic-0: #2e2e35;
+  --color-topic-0: #e2e2e4;
+  --bg-color-topic-1: #3a2226;
+  --color-topic-1: #ffb3ae;
+  --bg-color-topic-2: #3a3520;
+  --color-topic-2: #fff2ac;
+  --bg-color-topic-3: #1e3535;
+  --color-topic-3: #bdeaea;
+  --bg-color-topic-4: #2e2e35;
+  --color-topic-4: #e8e8ec;
+  --bg-color-topic-5: #2a2840;
+  --color-topic-5: #c9c7e8;
+}
+
+/* Presentation mode for projectors: one font size change on the document
+   root scales every rem-based Tailwind size (text, spacing, icons,
+   breakpoints) at once. Matches any element so the shadow DOM embed can
+   carry the same attribute on its own container. */
+[data-present="true"] {
+  font-size: 22px;
+}
+
+@layer base {
+  /* MANDATORY FIX FOR SHADOW DOM in Tailwind v4 */
+  *, ::before, ::after {
+    --tw-translate-x: 0;
+    --tw-translate-y: 0;
+    --tw-translate-z: 0;
+    --tw-rotate-x: rotateX(0);
+    --tw-rotate-y: rotateY(0);
+    --tw-rotate-z: rotateZ(0);
+    --tw-skew-x: skewX(0);
+    --tw-skew-y: skewY(0);
+    --tw-border-style: solid;
+    --tw-gradient-from: #0000;
+    --tw-gradient-via: #0000;
+    --tw-gradient-to: #0000;
+    --tw-gradient-from-position: 0%;
+    --tw-gradient-via-position: 50%;
+    --tw-gradient-to-position: 100%;
+    --tw-shadow: 0 0 #0000;
+    --tw-inset-shadow: 0 0 #0000;
+    --tw-ring-shadow: 0 0 #0000;
+    --tw-inset-ring-shadow: 0 0 #0000;
+    --tw-ring-offset-width: 0px;
+    --tw-ring-offset-color: #fff;
+    --tw-ring-offset-shadow: 0 0 #0000;
+    --tw-outline-style: solid;
+  }
+
+  button {
+    cursor: pointer;
+  }
+}
+
+@layer components {
+  [contenteditable='true']:focus {
+    font-size: 1rem;
+    outline: 2px solid var(--color-primary);
+    background-color: var(--color-surface);
+    color: var(--color-primary);
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    z-index: 50;
+    position: relative;
+    cursor: auto;
+  }
+}
+
+@layer utilities {
+  .topic-0 {
+    color: var(--color-topic-0);
+    background-color: var(--bg-color-topic-0);
+  }
+  .topic-1 {
+    color: var(--color-topic-1);
+    background-color: var(--bg-color-topic-1);
+  }
+  .topic-2 {
+    color: var(--color-topic-2);
+    background-color: var(--bg-color-topic-2);
+  }
+  .topic-3 {
+    color: var(--color-topic-3);
+    background-color: var(--bg-color-topic-3);
+  }
+  .topic-4 {
+    color: var(--color-topic-4);
+    background-color: var(--bg-color-topic-4);
+  }
+  .topic-5 {
+    color: var(--color-topic-5);
+    background-color: var(--bg-color-topic-5);
+  }
+}

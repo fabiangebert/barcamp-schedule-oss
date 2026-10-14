@@ -1,0 +1,90 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: barcamp
+      POSTGRES_USER: barcamp
+      POSTGRES_PASSWORD: barcamp
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U barcamp"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  app:
+    build:
+      context: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./src:/app/src
+      - ./public:/app/public
+      - ./migrations:/app/migrations
+      - ./migrations.php:/app/migrations.php
+      - ./migrations-db.php:/app/migrations-db.php
+      - barcamp_data:/data
+    environment:
+      APP_ENV: dev
+      APP_DEBUG: "true"
+      DB_DRIVER: pdo_pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: barcamp
+      DB_USER: barcamp
+      DB_PASSWORD: barcamp
+      DB_SSLMODE: prefer
+      ADMIN_EMAIL: admin@example.com
+      JWT_SECRET: "put-at-least-32-characters-here-1234567890"
+      UPLOADS_DIR: /data/uploads
+      APP_URL: http://localhost:5173
+      API_CORS_ORIGIN: "localhost:5173 testdomain.com"
+      MERCURE_URL: http://mercure:80/.well-known/mercure
+      MERCURE_PUBLIC_URL: http://localhost:8080/.well-known/mercure
+      MERCURE_JWT_SECRET: "change-me-32-char-secret-for-testing!!!"
+      MERCURE_JWT_TIMEOUT: 600
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mercure:
+        condition: service_started
+
+  frontend:
+    image: node:22-slim
+    working_dir: /app
+    command: sh -c "npm install && npm run dev"
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      VITE_PROXY_TARGET: http://app:8000
+      VITE_APP_TITLE: Barcamp Schedule
+
+  mercure:
+    image: dunglas/mercure:v0.24.2
+    ports:
+      - "8080:80"
+    environment:
+      SERVER_NAME: ":80"
+      MERCURE_PUBLISHER_JWT_KEY: "change-me-32-char-secret-for-testing!!!"
+      MERCURE_SUBSCRIBER_JWT_KEY: "change-me-32-char-secret-for-testing!!!"
+      MERCURE_EXTRA_DIRECTIVES: "cors_origins *"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+volumes:
+  barcamp_data:
+  postgres_data:

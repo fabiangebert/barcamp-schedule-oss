@@ -1,0 +1,184 @@
+{
+  "$ref": "#/definitions/ScheduleData",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "FeedbackQuestion": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "options": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "order": {
+          "type": "number"
+        },
+        "question": {
+          "type": "string"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "type": {
+          "enum": [
+            "rating",
+            "text",
+            "free_text",
+            "multiple_choice"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "question",
+        "type"
+      ],
+      "type": "object"
+    },
+    "Room": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "size": {
+          "$ref": "#/definitions/SizeCategory"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object"
+    },
+    "ScheduleData": {
+      "additionalProperties": false,
+      "properties": {
+        "ask_for_feedback": {
+          "type": "boolean"
+        },
+        "feedback_questions": {
+          "items": {
+            "$ref": "#/definitions/FeedbackQuestion"
+          },
+          "type": "array"
+        },
+        "rooms": {
+          "items": {
+            "$ref": "#/definitions/Room"
+          },
+          "type": "array"
+        },
+        "sessions": {
+          "items": {
+            "$ref": "#/definitions/Session"
+          },
+          "type": "array"
+        },
+        "timeslots": {
+          "items": {
+            "$ref": "#/definitions/Timeslot"
+          },
+          "type": "array"
+        },
+        "topics": {
+          "items": {
+            "$ref": "#/definitions/Topic"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "rooms",
+        "timeslots",
+        "sessions",
+        "topics"
+      ],
+      "type": "object"
+    },
+    "Session": {
+      "additionalProperties": false,
+      "properties": {
+        "audience_interest": {
+          "$ref": "#/definitions/SizeCategory"
+        },
+        "format": {
+          "type": "string"
+        },
+        "link": {
+          "type": "string"
+        },
+        "room": {
+          "description": "References Room.name. Buffer sessions use 'buffer-0', 'buffer-1', …",
+          "type": "string"
+        },
+        "speakers": {
+          "type": "string"
+        },
+        "timeslot": {
+          "description": "References Timeslot.name. Use the literal 'buffer' for unassigned sessions.",
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "topic": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "timeslot",
+        "room",
+        "title",
+        "topic"
+      ],
+      "type": "object"
+    },
+    "SizeCategory": {
+      "description": "Room capacity / session audience-interest indicator",
+      "enum": [
+        "S",
+        "M",
+        "L"
+      ],
+      "type": "string"
+    },
+    "Timeslot": {
+      "additionalProperties": false,
+      "properties": {
+        "hidden": {
+          "description": "When true the timeslot row is hidden in view-only mode",
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object"
+    },
+    "Topic": {
+      "additionalProperties": false,
+      "properties": {
+        "colorIndex": {
+          "description": "Index 0–7, maps to CSS class topic-0 … topic-7",
+          "type": "number"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object"
+    }
+  }
+}
+

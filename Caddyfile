@@ -1,0 +1,84 @@
+{
+	frankenphp
+	servers {
+		trusted_proxies static private_ranges
+	}
+}
+
+:8000 {
+	root * /app/public
+	encode gzip
+
+	# 1. CORS Preflight (OPTIONS) requests
+	@options_pub {
+		method OPTIONS
+		path /api/schedules/*
+	}
+	handle @options_pub {
+		header Access-Control-Allow-Origin "*"
+		header Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+		header Access-Control-Allow-Headers "Content-Type, Authorization, X-Guest-Id"
+		header Access-Control-Max-Age "3600"
+		respond "" 204
+	}
+
+	@options_priv {
+		method OPTIONS
+		path /api/*
+		header_regexp origin_match Origin ^https?://({$API_CORS_ORIGIN:.*})(:\d+)?$
+	}
+	handle @options_priv {
+		header Access-Control-Allow-Origin "{header.Origin}"
+		header Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+		header Access-Control-Allow-Headers "Content-Type, Authorization, X-Guest-Id"
+		header Access-Control-Max-Age "3600"
+		header Vary Origin
+		respond "" 204
+	}
+
+	@options_any {
+		method OPTIONS
+		path /api/*
+	}
+	handle @options_any {
+		respond "" 204
+	}
+
+	# 2. Add CORS headers to actual (non-OPTIONS) requests
+	@cors_public {
+		not method OPTIONS
+		path /api/schedules/*
+	}
+	header @cors_public {
+		Access-Control-Allow-Origin "*"
+		Access-Control-Allow-Headers "Content-Type, Authorization, X-Guest-Id"
+		Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+		defer
+	}
+
+	@cors_private {
+		not method OPTIONS
+		path /api/*
+		header_regexp origin_match Origin ^https?://({$API_CORS_ORIGIN:.*})(:\d+)?$
+	}
+	header @cors_private {
+		Access-Control-Allow-Origin "{header.Origin}"
+		Access-Control-Allow-Headers "Content-Type, Authorization, X-Guest-Id"
+		Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+		Vary Origin
+		defer
+	}
+
+	# 3. Resolve /api/* requests to public/api/index.php if they don't match an actual file
+	@api {
+		not method OPTIONS
+		path /api/*
+		not file {path}
+	}
+	rewrite @api /api/index.php
+
+	# 4. Fallback execution to the FrankenPHP/PHP server
+	php_server {
+		worker /app/public/api/index.php {$PHP_WORKER_COUNT:2}
+	}
+}

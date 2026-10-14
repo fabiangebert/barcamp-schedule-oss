@@ -1,0 +1,12 @@
+includes:
+    - vendor/phpstan/phpstan-deprecation-rules/rules.neon
+
+parameters:
+    level: 5
+    paths:
+        - src
+        - public/api
+        - migrations
+    phpVersion: 80500 
+    ignoreErrors:
+        - '#should return Slim\\App<Psr\\Container\\ContainerInterface\|null> but returns Slim\\App<Psr\\Container\\ContainerInterface\|null>#'

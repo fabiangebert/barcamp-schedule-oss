@@ -12,6 +12,20 @@ RUN npm run build
 # Stage 2: Install system dependencies for PHP extensions
 FROM dunglas/frankenphp:php8.4-alpine AS php-deps
 
+# Security gate: abort the build unless the base image ships a PHP release
+# containing the PHP2Shell fixes (CVE-2026-109618 / CVE-2026-109619, CVSS 9.2
+# unauthenticated RCE; fixed in PHP 8.4.27). FrankenPHP's moving `php8.4-alpine`
+# tag can lag behind PHP security releases, so this makes it impossible to
+# build or deploy a vulnerable container. Bump PHP_MIN_VERSION with every
+# future PHP security release.
+ARG PHP_MIN_VERSION=8.4.27
+RUN php -r 'exit(version_compare(PHP_VERSION, $argv[1], ">=") ? 0 : 1);' "${PHP_MIN_VERSION}" \
+    || { \
+        echo "ERROR: base image provides PHP $(php -r 'echo PHP_VERSION;') but >= ${PHP_MIN_VERSION} is required (CVE-2026-109618/109619)."; \
+        echo "Run 'docker pull dunglas/frankenphp:php8.4-alpine' and rebuild once FrankenPHP publishes a patched image."; \
+        exit 1; \
+    }
+
 RUN apk add --no-cache \
         curl \
         ca-certificates \
@@ -81,6 +95,13 @@ RUN printf 'upload_max_filesize=${PHP_UPLOAD_MAX_FILESIZE}\npost_max_size=${PHP_
 # Configure OPcache using environment variable expansion at runtime.
 RUN printf 'opcache.enable=${PHP_OPCACHE_ENABLE}\nopcache.enable_cli=${PHP_OPCACHE_ENABLE}\nopcache.memory_consumption=${PHP_OPCACHE_MEMORY_CONSUMPTION}\nopcache.interned_strings_buffer=${PHP_OPCACHE_INTERNED_STRINGS_BUFFER}\nopcache.max_accelerated_files=${PHP_OPCACHE_MAX_ACCELERATED_FILES}\nopcache.validate_timestamps=${PHP_OPCACHE_VALIDATE_TIMESTAMPS}\n' \
         > /usr/local/etc/php/conf.d/zz-opcache.ini
+
+# Harden the request lifecycle: the app authenticates with JWTs and never
+# starts native PHP sessions, so upload progress tracking is unused surface.
+# Disabling it removes the confirmed session-lifecycle producer/consumer path
+# from the PHP2Shell advisory (CVE-2026-109619) as defense in depth.
+RUN printf 'session.upload_progress.enabled=0\n' \
+        > /usr/local/etc/php/conf.d/zz-security.ini
 
 # Create writable runtime directories and transfer ownership to app.
 # FrankenPHP needs /data/caddy and /config/caddy to store certificates/cache.

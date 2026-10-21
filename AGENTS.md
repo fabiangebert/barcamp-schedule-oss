@@ -28,7 +28,7 @@ This document provides guidelines for AI agents working on the Barcamp Schedule 
 
 ## Tooling & Quality Assurance
 
-- **PHP**: PHP 8.1+ with Composer
+- **PHP**: PHP 8.4.27+ with Composer (security floor for CVE-2026-109618/109619)
 - **Node.js**: 18+ with npm
 - **Linting**:
   - Backend: `composer lint:style` (PHP_CodeSniffer with PSR-12) and `composer lint:logic` (PHPStan). Run both with `composer lint`.

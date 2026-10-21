@@ -68,6 +68,10 @@ jobs:
         with:
           context: .
           push: true
+          # Re-resolve base images on every build so a moving FrankenPHP tag
+          # with patched PHP (CVE-2026-109618/109619) is always picked up and
+          # a cached vulnerable base layer can never be reused.
+          pull: true
           tags: |
             rg.fr-par.scw.cloud/${{ vars.SCW_REGISTRY_NAMESPACE }}/app:${{ github.event.workflow_run.head_sha }}
             rg.fr-par.scw.cloud/${{ vars.SCW_REGISTRY_NAMESPACE }}/app:latest

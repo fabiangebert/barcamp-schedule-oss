@@ -3,7 +3,7 @@
 ## Development Setup
 
 ### Prerequisites
-- PHP 8.3+
+- PHP 8.4.27+ (minimum patched release for CVE-2026-109618/109619)
 - Node.js 18+
 - Composer
 - SQLite (for local development and tests)

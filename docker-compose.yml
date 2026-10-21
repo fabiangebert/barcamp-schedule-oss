@@ -18,6 +18,9 @@ services:
   app:
     build:
       context: .
+      # Always re-resolve the base image so rebuilds never reuse a cached,
+      # potentially vulnerable PHP base layer (CVE-2026-109618/109619).
+      pull: true
     ports:
       - "8000:8000"
     volumes:

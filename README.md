@@ -49,7 +49,7 @@ Static reads are served from S3/CDN (zero cold start), while the Serverless App 
 
 ## Prerequisites
 
-- PHP 8.1+ (8.4 recommended)
+- PHP 8.4.27+ (security floor for CVE-2026-109618/109619; keep patch versions current)
 - Composer
 - Node.js 18+ and npm
 - Docker (for the local dev environment with Mercure Hub)

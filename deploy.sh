@@ -40,6 +40,7 @@ echo "→ Building frontend..."
 echo "→ Building Docker image (${IMAGE})..."
 docker buildx build \
     --platform linux/amd64 \
+    --pull \
     -t "${IMAGE}" \
     -t "${LATEST}" \
     --push \

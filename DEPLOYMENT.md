@@ -392,3 +392,27 @@ Attach a policy with the following restricted API permissions to your CI/CD appl
    - `ServerlessJobsFullAccess`
 5. **Edge Services (CDN)**
    - `EdgeServicesCachePurge`
+
+---
+
+## 🔒 PHP Runtime Security
+
+The container runs [FrankenPHP](https://frankenphp.dev), whose moving `php8.4-alpine`
+base tag can lag behind PHP security releases.
+
+- **CVE-2026-109618 and CVE-2026-109619 ("PHP2Shell", 2026-10-21)**: critical unauthenticated
+  RCE affecting every PHP SAPI serving web requests, explicitly including FrankenPHP.
+  Fixed in PHP 8.2.35, 8.3.36, 8.4.27 and 8.5.12. There is no complete configuration-only
+  mitigation — the runtime **must** be patched.
+- **Build gate**: the `Dockerfile` aborts the build when the base image ships PHP below
+  `ARG PHP_MIN_VERSION` (currently `8.4.27`). CI-based deployments therefore fail closed
+  until FrankenPHP republishes a patched base. Check upstream state with:
+  `docker pull dunglas/frankenphp:php8.4-alpine && docker run --rm dunglas/frankenphp:php8.4-alpine php -v`
+- Bump `PHP_MIN_VERSION` (and the `composer.json` `php` floor) together with every future
+  PHP security release.
+- **Defense in depth**: the image sets `session.upload_progress.enabled=0` (the app uses
+  JWT auth, never PHP sessions), removing the confirmed session-lifecycle exploit path
+  from the CVE-2026-109619 advisory even on an unpatched base.
+- **Local development**: run the latest PHP patch release (≥ 8.5.12 for PHP 8.5 systems).
+  If a package manager has not shipped it yet, dev tooling can still run with
+  `composer <command> --ignore-platform-req=php`, but never deploy from an unpatched host.

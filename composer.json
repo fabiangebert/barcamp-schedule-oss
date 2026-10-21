@@ -3,6 +3,7 @@
     "description": "Barcamp Schedule Application",
     "license": "MIT",
     "require": {
+        "php": ">=8.4.27 <8.5.0 || >=8.5.12 <9",
         "ext-zip": "*",
         "slim/slim": "^4.15",
         "psr/http-message": "^2.0",

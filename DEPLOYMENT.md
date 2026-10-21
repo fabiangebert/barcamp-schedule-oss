@@ -405,9 +405,13 @@ base tag can lag behind PHP security releases.
   Fixed in PHP 8.2.35, 8.3.36, 8.4.27 and 8.5.12. There is no complete configuration-only
   mitigation — the runtime **must** be patched.
 - **Build gate**: the `Dockerfile` aborts the build when the base image ships PHP below
-  `ARG PHP_MIN_VERSION` (currently `8.4.27`). CI-based deployments therefore fail closed
-  until FrankenPHP republishes a patched base. Check upstream state with:
+  `ARG PHP_MIN_VERSION` (currently `8.4.27`). Since 2026-10-21 the base resolves to
+  FrankenPHP 1.13.2 / PHP 8.4.27 and deployments succeed again; the gate stays in place
+  so any future unpatched base fails closed. Check upstream state with:
   `docker pull dunglas/frankenphp:php8.4-alpine && docker run --rm dunglas/frankenphp:php8.4-alpine php -v`
+- The moving base tag can be rebuilt against an older Alpine snapshot, so the Dockerfile
+  runs `apk upgrade --no-cache` in the `php-deps` stage to re-resolve distro packages
+  (prevents e.g. `musl` vs `musl-dev` version conflicts on fresh pulls).
 - Bump `PHP_MIN_VERSION` (and the `composer.json` `php` floor) together with every future
   PHP security release.
 - **Defense in depth**: the image sets `session.upload_progress.enabled=0` (the app uses

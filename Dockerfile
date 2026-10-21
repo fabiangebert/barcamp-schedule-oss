@@ -26,7 +26,13 @@ RUN php -r 'exit(version_compare(PHP_VERSION, $argv[1], ">=") ? 0 : 1);' "${PHP_
         exit 1; \
     }
 
-RUN apk add --no-cache \
+# Re-resolve base packages against the current Alpine repositories: the moving
+# FrankenPHP tag is rebuilt against a slightly older distro snapshot, so later
+# `apk add` of *-dev packages can conflict with the preinstalled versions
+# (e.g. musl 1.2.6-r2 vs musl-dev 1.2.6-r3). Upgrading first keeps resolution
+# consistent and still picks up any distro security fixes.
+RUN apk upgrade --no-cache \
+    && apk add --no-cache \
         curl \
         ca-certificates \
         freetype libpng libjpeg-turbo libwebp \

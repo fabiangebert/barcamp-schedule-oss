@@ -466,7 +466,15 @@ const createSchedule = async () => {
     showNewScheduleModal.value = false
     await fetchSchedules()
   } catch (err) {
-    showApiError(showNotification, t('notifications.error'), t('auth.failedToCreateSchedule'), err)
+    if (err.response?.data?.error === 'Schedule name already exists') {
+      showNotification(
+        t('notifications.error'),
+        `${t('auth.failedToCreateSchedule')}: ${t('schedule.nameAlreadyExists')}`,
+        'error'
+      )
+    } else {
+      showApiError(showNotification, t('notifications.error'), t('auth.failedToCreateSchedule'), err)
+    }
   }
 }
 

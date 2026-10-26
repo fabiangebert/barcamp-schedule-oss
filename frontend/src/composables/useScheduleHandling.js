@@ -127,7 +127,7 @@ export function useScheduleHandling(token, API_BASE, axios, showNotification, lo
           );
         } else if (err.response?.status === 400 && err.response.data?.error === 'Schedule name already exists') {
           const newSchedule = err.response.data.current_schedule
-          showNotification(t('notifications.error'), t('schedule.failedToSave', { error: errorMessage }), 'error', {
+          showNotification(t('notifications.error'), t('schedule.failedToSave', { error: t('schedule.nameAlreadyExists') }), 'error', {
             closable: false,
             confirmText: t('common.retry'),
             cancelText: t('common.discard'),

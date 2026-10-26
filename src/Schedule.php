@@ -4,10 +4,23 @@ namespace App;
 
 use DateTime;
 use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Random\RandomException;
 
 class Schedule
 {
+    /**
+     * @param string $name
+     * @return bool
+     * @throws Exception
+     */
+    public static function nameExists(string $name): bool
+    {
+        $conn = Database::getConnection();
+        $existing = $conn->fetchAssociative('SELECT id FROM schedules WHERE name = ?', [$name]);
+        return $existing !== false;
+    }
+
     /**
      * @param string $name
      * @param array<string, mixed> $data
@@ -110,10 +123,14 @@ class Schedule
         // will affect zero rows and is reported as a version mismatch. The row
         // existence was already proven by getByHashedId above, so a zero-row
         // update unambiguously means the version no longer matches.
-        $affected = $conn->update('schedules', $updateData, [
-            'hashed_id' => $hashedId,
-            'version' => $version,
-        ]);
+        try {
+            $affected = $conn->update('schedules', $updateData, [
+                'hashed_id' => $hashedId,
+                'version' => $version,
+            ]);
+        } catch (UniqueConstraintViolationException $e) {
+            return 'name_exists';
+        }
 
         if ($affected === 0) {
             return 'version_mismatch';
@@ -138,7 +155,11 @@ class Schedule
             return false;
         }
 
-        $conn->update('schedules', ['name' => $newName], ['hashed_id' => $hashedId]);
+        try {
+            $conn->update('schedules', ['name' => $newName], ['hashed_id' => $hashedId]);
+        } catch (UniqueConstraintViolationException $e) {
+            return false;
+        }
 
         ChangeTracker::update($hashedId);
 

@@ -109,6 +109,7 @@
     "failedToSave": "Speichern fehlgeschlagen: {error}",
     "noInternet": "Keine Internetverbindung oder Server nicht erreichbar",
     "failedToCreate": "Zeitplan konnte nicht erstellt werden: {error}",
+    "nameAlreadyExists": "Ein Zeitplan mit diesem Namen existiert bereits",
     "failedToRename": "Umbenennen fehlgeschlagen: {error}",
     "failedToDelete": "Löschen fehlgeschlagen: {error}",
     "failedToUpdateDate": "Datum konnte nicht aktualisiert werden: {error}",

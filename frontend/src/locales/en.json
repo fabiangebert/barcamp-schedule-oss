@@ -109,6 +109,7 @@
     "failedToSave": "Failed to save: {error}",
     "noInternet": "No internet connection or server unreachable",
     "failedToCreate": "Failed to create schedule: {error}",
+    "nameAlreadyExists": "A schedule with this name already exists",
     "failedToRename": "Failed to rename schedule: {error}",
     "failedToDelete": "Failed to delete schedule: {error}",
     "failedToUpdateDate": "Failed to update date: {error}",

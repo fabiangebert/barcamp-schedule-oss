@@ -11,6 +11,7 @@ use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Schedule;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Firebase\JWT\JWT;
 use Slim\App;
 use Slim\Routing\RouteCollectorProxy;
@@ -139,7 +140,15 @@ class ScheduleRoutes
                         ], 400);
                     }
 
-                    $hashedId = Schedule::create($name, $scheduleData, $date);
+                    if (Schedule::nameExists($name)) {
+                        return self::withJson($response, ['error' => 'Schedule name already exists'], 400);
+                    }
+
+                    try {
+                        $hashedId = Schedule::create($name, $scheduleData, $date);
+                    } catch (UniqueConstraintViolationException $e) {
+                        return self::withJson($response, ['error' => 'Schedule name already exists'], 400);
+                    }
 
                     if (!$hashedId) {
                         return self::withJson($response, ['error' => 'Could not create schedule'], 500);

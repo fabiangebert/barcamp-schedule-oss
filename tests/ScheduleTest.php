@@ -111,6 +111,20 @@ class ScheduleTest extends BaseTestCase
      * @throws RandomException
      * @throws Exception
      */
+    public function testNameExists()
+    {
+        $name = 'unique-name-check';
+        $data = ['rooms' => [], 'timeslots' => [], 'sessions' => []];
+
+        $this->assertFalse(Schedule::nameExists($name));
+        Schedule::create($name, $data);
+        $this->assertTrue(Schedule::nameExists($name));
+    }
+
+    /**
+     * @throws RandomException
+     * @throws Exception
+     */
     public function testCreateWithDate()
     {
         $name = 'date-schedule';

@@ -107,6 +107,41 @@ describe('useScheduleHandling', () => {
     expect(axios.patch).not.toHaveBeenCalled()
   })
 
+  it('handles 400 Schedule name already exists on save', async () => {
+    const currentSchedule = ref({ hashed_id: 'test-id', data: { val: 1 }, version: 1, name: 'Duplicate' })
+    const lastSavingData = ref(null)
+    const documentationCounts = ref([])
+    const isConnected = ref(true)
+    const { saveSchedule } = useScheduleHandling(token, API_BASE, axios, showNotification, logout, {
+      currentSchedule,
+      lastSavingData,
+      documentationCounts,
+      isConnected
+    })
+
+    axios.patch.mockRejectedValueOnce({
+      response: {
+        status: 400,
+        data: { error: 'Schedule name already exists', current_schedule: { hashed_id: 'test-id', name: 'Original', data: {} } }
+      }
+    })
+
+    const saveStatus = ref('')
+    await saveSchedule(saveStatus)
+
+    expect(saveStatus.value).toBe('error')
+    expect(showNotification).toHaveBeenCalledWith(
+      'notifications.error',
+      'schedule.failedToSave',
+      'error',
+      expect.objectContaining({
+        closable: false,
+        confirmText: 'common.retry',
+        cancelText: 'common.discard'
+      })
+    )
+  })
+
   it('queues and submits pending changes after current save finishes', async () => {
     const initialData = { hashed_id: 'test-id', data: { val: 1 }, version: 1 }
     const firstSaveResponse = { hashed_id: 'test-id', data: { val: 1 }, version: 2 }

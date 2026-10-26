@@ -202,6 +202,45 @@ class ScheduleCreationTest extends BaseTestCase
         $this->assertNotEmpty($result['details']);
     }
 
+    /**
+     * @throws DateMalformedStringException
+     * @throws RandomException
+     * @throws Exception
+     * @throws \Exception
+     */
+    public function testCreateScheduleDuplicateNameReturns400()
+    {
+        $email = 'creator_dup@example.com';
+        $conn = Database::getConnection();
+        $conn->insert('users', ['email' => $email, 'role' => 'user']);
+
+        $token = Auth::generateMagicToken($email);
+        $result = Auth::verifyMagicToken($token);
+        $jwt = $result['token'] ?? '';
+
+        $name = 'Existing Schedule Name';
+        $data = [
+            'rooms' => [['name' => 'Main Hall']],
+            'timeslots' => [['name' => '09:00']],
+            'sessions' => [],
+            'topics' => [['name' => 'Default']],
+        ];
+
+        \App\Schedule::create($name, $data);
+
+        $request = $this->createRequest('POST', '/api/schedules', ['Authorization' => "Bearer $jwt"], [
+            'name' => $name,
+            'data' => $data
+        ]);
+
+        $response = $this->app->handle($request);
+        $this->assertEquals(400, $response->getStatusCode());
+
+        $body = (string)$response->getBody();
+        $result = json_decode($body, true);
+        $this->assertEquals('Schedule name already exists', $result['error']);
+    }
+
     public function testCreateScheduleUnauthorized()
     {
         $request = $this->createRequest('POST', '/api/schedules', [], [

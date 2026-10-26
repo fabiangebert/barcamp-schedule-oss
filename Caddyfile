@@ -3,11 +3,21 @@
 	servers {
 		trusted_proxies static private_ranges
 	}
+	log {
+		output stdout
+		format console
+		level INFO
+	}
 }
 
 :8000 {
 	root * /app/public
 	encode gzip
+
+	log {
+		output stdout
+		format console
+	}
 
 	# 1. CORS Preflight (OPTIONS) requests
 	@options_pub {
